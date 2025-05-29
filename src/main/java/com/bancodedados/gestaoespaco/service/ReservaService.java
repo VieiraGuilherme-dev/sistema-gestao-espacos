@@ -48,7 +48,7 @@ public class ReservaService {
                 .orElseThrow(() -> new RuntimeException("Espaço físico não encontrado com ID: " + espacoId));
 
         Reserva novaReserva = new Reserva(dataHoraInicio, dataHoraFim, espaco, usuario);
-        novaReserva.setStatus(StatusReserva.PENDENTE); // Define o status inicial usando o Enum
+        novaReserva.setStatus(StatusReserva.PENDENTE);
 
         return salvarReserva(novaReserva); // Delega para o método de salvamento com validação de conflito
     }
@@ -68,7 +68,7 @@ public class ReservaService {
                 if (!isConflictWithSelf || conflitos.size() > 1) { // Se houver outro conflito ou o conflito não é com a própria reserva
                     throw new RuntimeException("Já existe uma reserva no mesmo horário para este espaço.");
                 }
-            } else { // Se não tem ID, é uma nova reserva, qualquer conflito é um problema
+            } else {
                 throw new RuntimeException("Já existe uma reserva no mesmo horário para este espaço.");
             }
         }
@@ -84,7 +84,6 @@ public class ReservaService {
         return reservaRepository.findById(id);
     }
 
-    @Transactional
     public void excluirReserva(Long id) {
         if (!reservaRepository.existsById(id)) {
             throw new RuntimeException("Reserva não encontrada com ID: " + id);
@@ -95,7 +94,7 @@ public class ReservaService {
     public List<Reserva> listarPorStatus(String status) {
         try {
             StatusReserva statusEnum = StatusReserva.valueOf(status.toUpperCase()); // Converte a string para Enum
-            return reservaRepository.findByStatus(String.valueOf(statusEnum));
+            return reservaRepository.findByStatus(statusEnum);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Status de reserva inválido: " + status + ". Status permitidos: " + java.util.Arrays.toString(StatusReserva.values()));
         }
@@ -109,7 +108,6 @@ public class ReservaService {
         return reservaRepository.findByEspacoFisicoId(espacoId);
     }
 
-    @Transactional
     public Reserva aprovarReserva(Long id) {
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
@@ -118,10 +116,10 @@ public class ReservaService {
     }
 
     @Transactional
-    public Reserva recusarReserva(Long id) { // Renomeado para 'recusarReserva'
+    public Reserva recusarReserva(Long id) {
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
-        reserva.setStatus(StatusReserva.RECUSADA); // Usando o Enum (RECUSADA)
+        reserva.setStatus(StatusReserva.RECUSADA);
         return reservaRepository.save(reserva);
     }
 
@@ -129,7 +127,15 @@ public class ReservaService {
     public Reserva cancelarReserva(Long id) {
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
-        reserva.setStatus(StatusReserva.CANCELADA); // Usando o Enum
+        reserva.setStatus(StatusReserva.CANCELADA);
         return reservaRepository.save(reserva);
+    }
+
+    public List<Reserva> listarReservasOrdenadasPorDataHoraInicio() {
+        return reservaRepository.findAllByOrderByDataHoraInicioAsc();
+    }
+
+    public List<Reserva> listarReservasOrdenadasPorStatus() {
+        return reservaRepository.findAllByOrderByStatusAsc();
     }
 }
