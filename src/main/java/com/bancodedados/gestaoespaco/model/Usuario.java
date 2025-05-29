@@ -63,4 +63,7 @@ public class Usuario {
                 ", tipo='" + tipo + '\'' +
                 '}';
     }
+
+    public void setPapel(String gestor) {
+    }
 }

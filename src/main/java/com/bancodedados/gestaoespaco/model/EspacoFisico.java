@@ -111,4 +111,10 @@ public class EspacoFisico {
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
     }
+
+    public void setLocalizacao(String s) {
+    }
+
+    public void setCapacidade(int i) {
+    }
 }
