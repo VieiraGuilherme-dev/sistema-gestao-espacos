@@ -56,12 +56,7 @@ public class Usuario {
 
     @Override
     public String toString() {
-        return "Usuario{" +
-                "id=" + id +
-                ", nome='" + nome + '\'' +
-                ", email='" + email + '\'' +
-                ", tipo='" + tipo + '\'' +
-                '}';
+        return null;
     }
 
     public void setPapel(String gestor) {
