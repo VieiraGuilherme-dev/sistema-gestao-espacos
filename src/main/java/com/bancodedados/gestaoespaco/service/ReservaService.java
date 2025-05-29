@@ -3,6 +3,7 @@ package com.bancodedados.gestaoespaco.service;
 import com.bancodedados.gestaoespaco.model.Reserva;
 import com.bancodedados.gestaoespaco.model.Usuario;
 import com.bancodedados.gestaoespaco.model.EspacoFisico;
+import com.bancodedados.gestaoespaco.model.StatusReserva;
 import com.bancodedados.gestaoespaco.repository.ReservaRepository;
 import com.bancodedados.gestaoespaco.repository.UsuarioRepository;
 import com.bancodedados.gestaoespaco.repository.EspacoFisicoRepository;
@@ -47,7 +48,7 @@ public class ReservaService {
                 .orElseThrow(() -> new RuntimeException("Espaço físico não encontrado com ID: " + espacoId));
 
         Reserva novaReserva = new Reserva(dataHoraInicio, dataHoraFim, espaco, usuario);
-        novaReserva.setStatus("PENDENTE");
+        novaReserva.setStatus(StatusReserva.PENDENTE); // Define o status inicial usando o Enum
 
         return salvarReserva(novaReserva); // Delega para o método de salvamento com validação de conflito
     }
@@ -62,7 +63,6 @@ public class ReservaService {
         );
 
         if (!conflitos.isEmpty()) {
-            // Se a reserva já tem um ID, verifica se o único conflito é com ela mesma (caso de update)
             if (reserva.getId() != null) {
                 boolean isConflictWithSelf = conflitos.stream().anyMatch(r -> r.getId().equals(reserva.getId()));
                 if (!isConflictWithSelf || conflitos.size() > 1) { // Se houver outro conflito ou o conflito não é com a própria reserva
@@ -93,7 +93,12 @@ public class ReservaService {
     }
 
     public List<Reserva> listarPorStatus(String status) {
-        return reservaRepository.findByStatus(status);
+        try {
+            StatusReserva statusEnum = StatusReserva.valueOf(status.toUpperCase()); // Converte a string para Enum
+            return reservaRepository.findByStatus(String.valueOf(statusEnum));
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Status de reserva inválido: " + status + ". Status permitidos: " + java.util.Arrays.toString(StatusReserva.values()));
+        }
     }
 
     public List<Reserva> listarPorUsuario(Long usuarioId) {
@@ -108,15 +113,15 @@ public class ReservaService {
     public Reserva aprovarReserva(Long id) {
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
-        reserva.setStatus("APROVADA");
+        reserva.setStatus(StatusReserva.APROVADA); // Usando o Enum
         return reservaRepository.save(reserva);
     }
 
     @Transactional
-    public Reserva recusarReserva(Long id) {
+    public Reserva recusarReserva(Long id) { // Renomeado para 'recusarReserva'
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
-        reserva.setStatus("RECUSADA");
+        reserva.setStatus(StatusReserva.RECUSADA); // Usando o Enum (RECUSADA)
         return reservaRepository.save(reserva);
     }
 
@@ -124,7 +129,7 @@ public class ReservaService {
     public Reserva cancelarReserva(Long id) {
         Reserva reserva = reservaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
-        reserva.setStatus("CANCELADA");
+        reserva.setStatus(StatusReserva.CANCELADA); // Usando o Enum
         return reservaRepository.save(reserva);
     }
 }

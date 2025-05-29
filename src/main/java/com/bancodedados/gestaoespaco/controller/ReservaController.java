@@ -1,4 +1,4 @@
-package com.bancodedados.gestaoespaco.controller; // Pacote corrigido
+package com.bancodedados.gestaoespaco.controller;
 
 import com.bancodedados.gestaoespaco.model.Reserva;
 import com.bancodedados.gestaoespaco.service.ReservaService;
@@ -40,43 +40,36 @@ public class ReservaController {
     @GetMapping
     public ResponseEntity<List<Reserva>> listarTodasReservas() {
         List<Reserva> reservas = reservaService.listarReservas();
-        return ResponseEntity.ok(reservas); // 200 OK
+        return ResponseEntity.ok(reservas);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Reserva> buscarReservaPorId(@PathVariable Long id) {
         return reservaService.buscarReserva(id)
                 .map(ResponseEntity::ok)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva não encontrada com ID: " + id)); // 404 Not Found
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Reserva não encontrada com ID: " + id));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Reserva> atualizarReserva(@PathVariable Long id, @RequestBody Reserva reservaAtualizada) {
         try {
-            // Primeiro, busca a reserva existente para garantir que ela exista
             Reserva reservaExistente = reservaService.buscarReserva(id)
                     .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
 
-            // Atualiza os campos da reserva existente com os dados recebidos
             reservaExistente.setDataHoraInicio(reservaAtualizada.getDataHoraInicio());
             reservaExistente.setDataHoraFim(reservaAtualizada.getDataHoraFim());
-            reservaExistente.setStatus(reservaAtualizada.getStatus());
+            reservaExistente.setStatus(reservaAtualizada.getStatus()); // O Jackson (Spring) deve mapear a string para o Enum
 
-            if (reservaAtualizada.getUsuario() != null) {
-                // Se o usuário no payload atualizado tem um ID, você precisaria buscar e setar o usuário real
-                // Ou o método salvarReserva do serviço precisaria lidar com essa lógica
+            if (reservaAtualizada.getUsuario() != null && reservaAtualizada.getUsuario().getId() != null) {
                 reservaExistente.setUsuario(reservaAtualizada.getUsuario());
             }
-            if (reservaAtualizada.getEspacoFisico() != null) {
-                // Mesma lógica para o espaço físico
+            if (reservaAtualizada.getEspacoFisico() != null && reservaAtualizada.getEspacoFisico().getId() != null) {
                 reservaExistente.setEspacoFisico(reservaAtualizada.getEspacoFisico());
             }
 
-            // Chama o serviço para salvar a reserva atualizada (com a validação de conflito)
             return ResponseEntity.ok(reservaService.salvarReserva(reservaExistente));
 
         } catch (RuntimeException e) {
-            // Erros como "Reserva não encontrada" ou "Conflito de horário"
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
@@ -85,16 +78,16 @@ public class ReservaController {
     public ResponseEntity<Void> excluirReserva(@PathVariable Long id) {
         try {
             reservaService.excluirReserva(id);
-            return ResponseEntity.noContent().build(); // 204 No Content
+            return ResponseEntity.noContent().build();
         } catch (RuntimeException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage()); // 404 Not Found
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
+
     @GetMapping("/status/{status}")
     public ResponseEntity<List<Reserva>> listarPorStatus(@PathVariable String status) {
-        // Assume que o status pode ser passado em maiúsculas, ajuste se necessário
-        List<Reserva> reservas = reservaService.listarPorStatus(status.toUpperCase());
+        List<Reserva> reservas = reservaService.listarPorStatus(status);
         return ResponseEntity.ok(reservas);
     }
 
@@ -111,30 +104,30 @@ public class ReservaController {
     }
 
     @PutMapping("/{id}/aprovar")
-    public ResponseEntity<Reserva> aprovarReserva(@PathVariable Long id) {
+    public ResponseEntity<Reserva> aprovar(@PathVariable Long id) {
         try {
-            Reserva reservaAprovada = reservaService.aprovarReserva(id);
-            return ResponseEntity.ok(reservaAprovada);
+            Reserva aprovada = reservaService.aprovarReserva(id);
+            return ResponseEntity.ok(aprovada);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
-    @PutMapping("/{id}/recusar")
-    public ResponseEntity<Reserva> recusarReserva(@PathVariable Long id) {
+    @PutMapping("/{id}/recusar") // Mantido 'recusar' para consistência com o Enum RECUSADA
+    public ResponseEntity<Reserva> recusar(@PathVariable Long id) {
         try {
-            Reserva reservaRecusada = reservaService.recusarReserva(id);
-            return ResponseEntity.ok(reservaRecusada);
+            Reserva recusada = reservaService.recusarReserva(id); // Chamando o método 'recusarReserva'
+            return ResponseEntity.ok(recusada);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
     @PutMapping("/{id}/cancelar")
-    public ResponseEntity<Reserva> cancelarReserva(@PathVariable Long id) {
+    public ResponseEntity<Reserva> cancelar(@PathVariable Long id) {
         try {
-            Reserva reservaCancelada = reservaService.cancelarReserva(id);
-            return ResponseEntity.ok(reservaCancelada);
+            Reserva cancelada = reservaService.cancelarReserva(id);
+            return ResponseEntity.ok(cancelada);
         } catch (RuntimeException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }

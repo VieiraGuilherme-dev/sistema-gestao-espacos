@@ -1,11 +1,15 @@
 package com.bancodedados.gestaoespaco.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Objects;
 
 @Entity
 @Table(name = "espaco_fisico")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "reservas"})
 public class EspacoFisico {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -13,89 +17,53 @@ public class EspacoFisico {
     @Column(nullable = false)
     private String nome;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String tipo;
+    private TipoEspaco tipo;
 
     @Column(nullable = false)
     private double metragem;
 
-    @OneToMany(mappedBy = "espaco", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<EspacoEquipamento> equipamentos = new ArrayList<>();
+    @OneToMany(mappedBy = "espacoFisico", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({"espacoFisico"}) // Ignora o 'espacoFisico' dentro da lista de reservas para evitar ciclo
+    private List<Reserva> reservas;
 
+    @ElementCollection
+    @CollectionTable(name = "espaco_equipamento", joinColumns = @JoinColumn(name = "espaco_fisico_id"))
+    @Column(name = "equipamento")
+    private List<String> equipamentos;
 
-    public EspacoFisico() {
-    }
+    public EspacoFisico() {}
 
-    public EspacoFisico(String nome, String tipo, double metragem) {
+    public EspacoFisico(String nome, TipoEspaco tipo, double metragem, List<String> equipamentos) {
         this.nome = nome;
         this.tipo = tipo;
         this.metragem = metragem;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public double getMetragem() {
-        return metragem;
-    }
-
-    public void setMetragem(double metragem) {
-        this.metragem = metragem;
-    }
-
-    public List<EspacoEquipamento> getEquipamentos() {
-        return equipamentos;
-    }
-
-    public void setEquipamentos(List<EspacoEquipamento> equipamentos) {
         this.equipamentos = equipamentos;
     }
 
-    // --- Helper methods for managing the 'equipamentos' list ---
-    // These methods help maintain both sides of the bidirectional relationship
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+    public TipoEspaco getTipo() { return tipo; }
+    public void setTipo(TipoEspaco tipo) { this.tipo = tipo; }
+    public double getMetragem() { return metragem; }
+    public void setMetragem(double metragem) { this.metragem = metragem; }
+    public List<String> getEquipamentos() { return equipamentos; }
+    public void setEquipamentos(List<String> equipamentos) { this.equipamentos = equipamentos; }
+    public List<Reserva> getReservas() { return reservas; }
+    public void setReservas(List<Reserva> reservas) { this.reservas = reservas; }
 
-    public void addEquipamento(EspacoEquipamento equipamento) {
-        if (equipamento != null) {
-            equipamentos.add(equipamento);
-            equipamento.setEspaco(this);
-        }
-    }
-
-    public void removeEquipamento(EspacoEquipamento equipamento) {
-        if (equipamento != null) {
-            equipamentos.remove(equipamento);
-            equipamento.setEspaco(null);
-        }
-    }
 
     @Override
     public String toString() {
         return "EspacoFisico{" +
                 "id=" + id +
                 ", nome='" + nome + '\'' +
-                ", tipo='" + tipo + '\'' +
+                ", tipo=" + tipo +
                 ", metragem=" + metragem +
+                ", equipamentos=" + equipamentos +
                 '}';
     }
 
@@ -104,17 +72,11 @@ public class EspacoFisico {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         EspacoFisico that = (EspacoFisico) o;
-        return id != null && id.equals(that.id);
+        return id != null && Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
-    }
-
-    public void setLocalizacao(String s) {
-    }
-
-    public void setCapacidade(int i) {
+        return Objects.hash(id);
     }
 }

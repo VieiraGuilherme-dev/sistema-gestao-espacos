@@ -1,64 +1,82 @@
 package com.bancodedados.gestaoespaco.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import java.util.List;
+import java.util.Objects;
 
 @Entity
+@Table(name = "usuario")
+
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "reservas"})
 public class Usuario {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String nome;
+
+    @Column(nullable = false, unique = true)
     private String email;
-    private String tipo;
 
-    public Usuario() {
-    }
+    @Enumerated(EnumType.STRING)
+    private TipoUsuario tipo;
 
-    // Construtor com parâmetros
-    public Usuario(String nome, String email, String tipo) {
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({"usuario"})
+    private List<Reserva> reservas;
+
+    public Usuario() {}
+
+    public Usuario(String nome, String email, TipoUsuario tipo) {
         this.nome = nome;
         this.email = email;
         this.tipo = tipo;
     }
 
-    // Getters e setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public void setId(Long id) { this.id = id; }
 
-    public String getNome() {
-        return nome;
-    }
+    public String getNome() { return nome; }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+    public void setNome(String nome) { this.nome = nome; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getEmail() { return email; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getTipo() {
-        return tipo;
-    }
+    public TipoUsuario getTipo() { return tipo; }
 
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
+    public void setTipo(TipoUsuario tipo) { this.tipo = tipo; }
+
+    public List<Reserva> getReservas() { return reservas; }
+
+    public void setReservas(List<Reserva> reservas) { this.reservas = reservas; }
+
 
     @Override
     public String toString() {
-        return null;
+        return "Usuario{" +
+                "id=" + id +
+                ", nome='" + nome + '\'' +
+                ", email='" + email + '\'' +
+                ", tipo=" + tipo +
+                '}';
     }
 
-    public void setPapel(String gestor) {
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Usuario usuario = (Usuario) o;
+        return id != null && Objects.equals(id, usuario.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

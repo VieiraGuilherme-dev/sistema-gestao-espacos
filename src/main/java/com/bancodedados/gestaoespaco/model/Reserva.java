@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+
 @Entity
 @Table(name = "reserva")
 public class Reserva {
@@ -18,8 +19,9 @@ public class Reserva {
     @Column(nullable = false)
     private LocalDateTime dataHoraFim;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status; // Ex: PENDENTE, APROVADA, RECUSADA, CANCELADA
+    private StatusReserva status = StatusReserva.PENDENTE;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "espaco_fisico_id", nullable = false)
@@ -29,18 +31,18 @@ public class Reserva {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-
     public Reserva() {
-        this.status = "PENDENTE";
+
     }
 
+    // Construtor para facilitar a criação de novas reservas
     public Reserva(LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim,
                    EspacoFisico espacoFisico, Usuario usuario) {
         this.dataHoraInicio = dataHoraInicio;
         this.dataHoraFim = dataHoraFim;
         this.espacoFisico = espacoFisico;
         this.usuario = usuario;
-        this.status = "PENDENTE"; // Status inicial ao criar
+        // O status padrão PENDENTE já é definido na declaração do campo, não precisamos setar aqui.
     }
 
     public Long getId() {
@@ -67,12 +69,11 @@ public class Reserva {
         this.dataHoraFim = dataHoraFim;
     }
 
-    public String getStatus() {
+    public StatusReserva getStatus() { // Getter para o Enum StatusReserva
         return status;
     }
 
-    public void setStatus(String status) {
-
+    public void setStatus(StatusReserva status) { // Setter para o Enum StatusReserva
         this.status = status;
     }
 
@@ -98,7 +99,7 @@ public class Reserva {
                 "id=" + id +
                 ", dataHoraInicio=" + dataHoraInicio +
                 ", dataHoraFim=" + dataHoraFim +
-                ", status='" + status + '\'' +
+                ", status=" + status + // Agora imprime o nome do Enum (ex: PENDENTE)
                 ", espacoFisicoId=" + (espacoFisico != null ? espacoFisico.getId() : "null") +
                 ", usuarioId=" + (usuario != null ? usuario.getId() : "null") +
                 '}';
@@ -109,12 +110,12 @@ public class Reserva {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Reserva reserva = (Reserva) o;
-        // Compara por ID para entidades persistentes, assumindo que ID é único
+        // Usa Objects.equals para lidar com IDs nulos e compara apenas o ID para igualdade
         return id != null && Objects.equals(id, reserva.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id); // Gera o hashCode baseado no ID
     }
 }
