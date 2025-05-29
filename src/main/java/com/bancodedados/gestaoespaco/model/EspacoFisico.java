@@ -1,31 +1,29 @@
 package com.bancodedados.gestaoespaco.model;
 import jakarta.persistence.*;
 import java.util.List;
-import java.util.ArrayList; // Import for initializing the list
+import java.util.ArrayList;
 
 @Entity
-@Table(name = "espaco_fisico") // It's good practice to explicitly name your tables
+@Table(name = "espaco_fisico")
 public class EspacoFisico {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false) // 'nome' is likely a required field
+    @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false) // 'tipo' is likely a required field
-    private String tipo; // exemplo: laboratório, sala, auditório, etc.
+    @Column(nullable = false)
+    private String tipo;
 
-    @Column(nullable = false) // 'metragem' is likely a required field
+    @Column(nullable = false)
     private double metragem;
 
     @OneToMany(mappedBy = "espaco", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<EspacoEquipamento> equipamentos = new ArrayList<>();
 
-    // --- Constructors ---
 
     public EspacoFisico() {
-        // Default constructor required by JPA
     }
 
     public EspacoFisico(String nome, String tipo, double metragem) {
@@ -33,8 +31,6 @@ public class EspacoFisico {
         this.tipo = tipo;
         this.metragem = metragem;
     }
-
-    // --- Getters and Setters ---
 
     public Long getId() {
         return id;
@@ -56,7 +52,6 @@ public class EspacoFisico {
         return tipo;
     }
 
-    // CORRECTED LINE: Removed the extra 'void'
     public void setTipo(String tipo) {
         this.tipo = tipo;
     }
@@ -93,8 +88,6 @@ public class EspacoFisico {
             equipamento.setEspaco(null);
         }
     }
-
-    // --- Optional: toString(), equals(), and hashCode() for better object handling ---
 
     @Override
     public String toString() {

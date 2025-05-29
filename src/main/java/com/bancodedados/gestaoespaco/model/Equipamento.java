@@ -20,19 +20,13 @@ public class Equipamento {
     @OneToMany(mappedBy = "equipamento", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<EspacoEquipamento> espacos = new ArrayList<>(); // Initialize the list to prevent NullPointerExceptions
 
-    // --- Constructors ---
-
-    // Default constructor required by JPA
     public Equipamento() {
     }
 
-    // Constructor with common fields for easier object creation
     public Equipamento(String nome, String descricao) {
         this.nome = nome;
         this.descricao = descricao;
     }
-
-    // --- Getters and Setters ---
 
     public Long getId() {
         return id;
@@ -66,9 +60,6 @@ public class Equipamento {
         this.espacos = espacos;
     }
 
-    // --- Helper methods for managing the 'espacos' list ---
-    // These methods help maintain both sides of the bidirectional relationship consistently.
-
     public void addEspacoEquipamento(EspacoEquipamento espacoEquipamento) {
         if (espacoEquipamento != null) {
             espacos.add(espacoEquipamento);
@@ -82,8 +73,6 @@ public class Equipamento {
             espacoEquipamento.setEquipamento(null); // Remove the back-reference
         }
     }
-
-    // --- Optional: toString(), equals(), and hashCode() for better object handling ---
 
     @Override
     public String toString() {
