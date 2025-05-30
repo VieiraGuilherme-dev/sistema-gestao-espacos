@@ -1,23 +1,10 @@
 package com.bancodedados.gestaoespaco.model;
 
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = "espaco_equipamento")
 public class EspacoEquipamento {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "espaco_id", nullable = false)
     private EspacoFisico espaco;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "equipamento_id", nullable = false)
     private Equipamento equipamento;
-
-    @Column(nullable = false)
     private int quantidade;
 
     public EspacoEquipamento() {
@@ -74,7 +61,7 @@ public class EspacoEquipamento {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof EspacoEquipamento)) return false;
         EspacoEquipamento that = (EspacoEquipamento) o;
         return id != null && id.equals(that.id);
     }
