@@ -66,4 +66,7 @@ public class Solicitacao {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    public void setSala(String sala) {
+    }
 }

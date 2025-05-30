@@ -11,6 +11,7 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @Configuration
 public class DataLoader {
@@ -22,77 +23,98 @@ public class DataLoader {
     public CommandLineRunner loadData() {
         return args -> {
             try (Connection conn = dataSource.getConnection()) {
+                conn.setAutoCommit(false);
 
-                // Verifica se há usuários
-                ResultSet rsUsuarios = conn.prepareStatement("SELECT COUNT(*) FROM usuarios").executeQuery();
-                rsUsuarios.next();
-                if (rsUsuarios.getInt(1) == 0) {
+                if (isTableEmpty(conn, "usuario")) {
+                    String sqlUsuario = "INSERT INTO usuario (nome, email, tipo, senha) VALUES (?, ?, ?, ?)";
+                    try (PreparedStatement stmtUsuario = conn.prepareStatement(sqlUsuario)) {
 
-                    String sqlUsuario = "INSERT INTO usuarios (nome, email, tipo) VALUES (?, ?, ?)";
-                    PreparedStatement stmtUsuario = conn.prepareStatement(sqlUsuario);
+                        // Usuário Admin (com senha padrão)
+                        stmtUsuario.setString(1, "Admin do Sistema");
+                        stmtUsuario.setString(2, "admin@gestao.com");
+                        stmtUsuario.setString(3, TipoUsuario.ADMIN.name());
+                        stmtUsuario.setString(4, "senhaadmin123");
+                        stmtUsuario.addBatch(); // Adiciona ao lote
 
-                    stmtUsuario.setString(1, "Admin do Sistema");
-                    stmtUsuario.setString(2, "admin@gestao.com");
-                    stmtUsuario.setString(3, TipoUsuario.ADMIN.name());
-                    stmtUsuario.executeUpdate();
+                        // Aluno Exemplo
+                        stmtUsuario.setString(1, "Aluno Exemplo");
+                        stmtUsuario.setString(2, "aluno@email.com");
+                        stmtUsuario.setString(3, TipoUsuario.ALUNO.name());
+                        stmtUsuario.setString(4, "senhaaluno123");
+                        stmtUsuario.addBatch();
 
-                    stmtUsuario.setString(1, "Aluno Exemplo");
-                    stmtUsuario.setString(2, "aluno@email.com");
-                    stmtUsuario.setString(3, TipoUsuario.ALUNO.name());
-                    stmtUsuario.executeUpdate();
+                        // Prof. Ana Silva
+                        stmtUsuario.setString(1, "Prof. Ana Silva");
+                        stmtUsuario.setString(2, "ana.silva@escola.com");
+                        stmtUsuario.setString(3, TipoUsuario.PROFESSOR.name());
+                        stmtUsuario.setString(4, "senhaprof123");
+                        stmtUsuario.addBatch();
 
-                    stmtUsuario.setString(1, "Prof. Ana Silva");
-                    stmtUsuario.setString(2, "ana.silva@escola.com");
-                    stmtUsuario.setString(3, TipoUsuario.PROFESSOR.name());
-                    stmtUsuario.executeUpdate();
+                        // Func. João Mendes
+                        stmtUsuario.setString(1, "Func. João Mendes");
+                        stmtUsuario.setString(2, "joao.mendes@escola.com");
+                        stmtUsuario.setString(3, TipoUsuario.FUNCIONARIO.name());
+                        stmtUsuario.setString(4, "senhafunc123");
+                        stmtUsuario.addBatch();
 
-                    stmtUsuario.setString(1, "Func. João Mendes");
-                    stmtUsuario.setString(2, "joao.mendes@escola.com");
-                    stmtUsuario.setString(3, TipoUsuario.FUNCIONARIO.name());
-                    stmtUsuario.executeUpdate();
-
-                    System.out.println("Usuários de teste inseridos.");
+                        stmtUsuario.executeBatch(); // Executa todas as inserções em lote
+                        System.out.println("Usuários de teste inseridos na tabela 'usuario'.");
+                    }
                 }
 
-                // Verifica se há espaços físicos
-                ResultSet rsEspacos = conn.prepareStatement("SELECT COUNT(*) FROM espacos").executeQuery();
-                rsEspacos.next();
-                if (rsEspacos.getInt(1) == 0) {
+                if (isTableEmpty(conn, "espaco_fisico")) {
+                    String sqlEspaco = "INSERT INTO espaco_fisico (nome, tipo, capacidade) VALUES (?, ?, ?)"; // Ajustado para 'capacidade'
+                    try (PreparedStatement stmtEspaco = conn.prepareStatement(sqlEspaco)) {
 
-                    String sqlEspaco = "INSERT INTO espacos (nome, tipo, metragem) VALUES (?, ?, ?)";
-                    PreparedStatement stmtEspaco = conn.prepareStatement(sqlEspaco);
+                        // Auditório Principal
+                        stmtEspaco.setString(1, "Auditório Principal");
+                        stmtEspaco.setString(2, TipoEspaco.AUDITORIO.name());
+                        stmtEspaco.setInt(3, 200); // Capacidade em vez de metragem
+                        stmtEspaco.addBatch();
 
-                    stmtEspaco.setString(1, "Auditório Principal");
-                    stmtEspaco.setString(2, TipoEspaco.AUDITORIO.name());
-                    stmtEspaco.setDouble(3, 200.0);
-                    stmtEspaco.executeUpdate();
+                        // Laboratório de Informática 1
+                        stmtEspaco.setString(1, "Laboratório de Informática 1");
+                        stmtEspaco.setString(2, TipoEspaco.LABORATORIO.name());
+                        stmtEspaco.setInt(3, 50);
+                        stmtEspaco.addBatch();
 
-                    stmtEspaco.setString(1, "Laboratório de Informática 1");
-                    stmtEspaco.setString(2, TipoEspaco.LABORATORIO.name());
-                    stmtEspaco.setDouble(3, 50.0);
-                    stmtEspaco.executeUpdate();
+                        // Sala de Aula 101
+                        stmtEspaco.setString(1, "Sala de Aula 101");
+                        stmtEspaco.setString(2, TipoEspaco.SALA_DE_AULA.name());
+                        stmtEspaco.setInt(3, 40);
+                        stmtEspaco.addBatch();
 
-                    stmtEspaco.setString(1, "Sala de Aula 101");
-                    stmtEspaco.setString(2, TipoEspaco.SALA_DE_AULA.name());
-                    stmtEspaco.setDouble(3, 40.0);
-                    stmtEspaco.executeUpdate();
+                        // Sala de Reunião Bloco B
+                        stmtEspaco.setString(1, "Sala de Reunião Bloco B");
+                        stmtEspaco.setString(2, TipoEspaco.SALA_DE_REUNIAO.name());
+                        stmtEspaco.setInt(3, 25);
+                        stmtEspaco.addBatch();
 
-                    stmtEspaco.setString(1, "Sala de Reunião Bloco B");
-                    stmtEspaco.setString(2, TipoEspaco.SALA_DE_REUNIAO.name());
-                    stmtEspaco.setDouble(3, 25.0);
-                    stmtEspaco.executeUpdate();
+                        // Quadra Poliesportiva
+                        stmtEspaco.setString(1, "Quadra Poliesportiva");
+                        stmtEspaco.setString(2, TipoEspaco.QUADRA.name());
+                        stmtEspaco.setInt(3, 600);
+                        stmtEspaco.addBatch();
 
-                    stmtEspaco.setString(1, "Quadra Poliesportiva");
-                    stmtEspaco.setString(2, TipoEspaco.QUADRA.name());
-                    stmtEspaco.setDouble(3, 600.0);
-                    stmtEspaco.executeUpdate();
-
-                    System.out.println("Espaços físicos de teste inseridos.");
+                        stmtEspaco.executeBatch();
+                        System.out.println("Espaços físicos de teste inseridos na tabela 'espaco_fisico'.");
+                    }
                 }
+                conn.commit();
+            } catch (SQLException e) {
+                System.err.println("Erro ao carregar dados iniciais: " + e.getMessage());
 
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         };
+    }
+
+    // Método auxiliar para verificar se uma tabela está vazia
+    private boolean isTableEmpty(Connection conn, String tableName) throws SQLException {
+        try (ResultSet rs = conn.createStatement().executeQuery("SELECT COUNT(*) FROM " + tableName)) {
+            if (rs.next()) {
+                return rs.getInt(1) == 0;
+            }
+        }
+        return true;
     }
 }
