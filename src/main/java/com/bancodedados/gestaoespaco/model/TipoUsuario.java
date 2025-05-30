@@ -1,8 +1,9 @@
 package com.bancodedados.gestaoespaco.model;
 
 public enum TipoUsuario {
-    ADMIN,      // Para "GESTOR"
-    ALUNO,      // Para "ALUNO"
+    ADMIN,
+    GESTOR,
     PROFESSOR,
+    ALUNO,
     FUNCIONARIO
 }

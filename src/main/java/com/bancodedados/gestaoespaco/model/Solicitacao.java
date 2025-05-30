@@ -1,54 +1,97 @@
 package com.bancodedados.gestaoespaco.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
+import java.time.LocalTime;
 
 public class Solicitacao {
+
     private Long id;
-    private Usuario solicitante;
-    private EspacoFisico espaco;
-    private LocalDateTime dataHoraSolicitada;
+    private Long usuarioId;
+    private Long espacoId;
+    private LocalDate dataReserva;
+    private LocalTime horaReserva;
     private LocalDateTime dataSolicitacao;
-    private String status;
+    private String status; // PENDENTE, APROVADA, REJEITADA
 
     public Solicitacao() {
         this.dataSolicitacao = LocalDateTime.now();
-        this.status = "PENDENTE";
+        this.status = "PENDENTE"; // Default status
     }
 
-    public Solicitacao(Usuario solicitante, EspacoFisico espaco, LocalDateTime dataHoraSolicitada) {
-        this.solicitante = solicitante;
-        this.espaco = espaco;
-        this.dataHoraSolicitada = dataHoraSolicitada;
+    public Solicitacao(Long usuarioId, Long espacoId, LocalDate dataReserva, LocalTime horaReserva) {
+        this.usuarioId = usuarioId;
+        this.espacoId = espacoId;
+        this.dataReserva = dataReserva;
+        this.horaReserva = horaReserva;
         this.dataSolicitacao = LocalDateTime.now();
-        this.status = "PENDENTE";
+        this.status = "PENDENTE"; // Default status
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Usuario getSolicitante() { return solicitante; }
-    public void setSolicitante(Usuario solicitante) { this.solicitante = solicitante; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public EspacoFisico getEspaco() { return espaco; }
-    public void setEspaco(EspacoFisico espaco) { this.espaco = espaco; }
+    public Long getUsuarioId() {
+        return usuarioId;
+    }
 
-    public LocalDateTime getDataHoraSolicitada() { return dataHoraSolicitada; }
-    public void setDataHoraSolicitada(LocalDateTime dataHoraSolicitada) { this.dataHoraSolicitada = dataHoraSolicitada; }
+    public void setUsuarioId(Long usuarioId) {
+        this.usuarioId = usuarioId;
+    }
 
-    public LocalDateTime getDataSolicitacao() { return dataSolicitacao; }
-    public void setDataSolicitacao(LocalDateTime dataSolicitacao) { this.dataSolicitacao = dataSolicitacao; }
+    public Long getEspacoId() {
+        return espacoId;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setEspacoId(Long espacoId) {
+        this.espacoId = espacoId;
+    }
+
+    public LocalDate getDataReserva() {
+        return dataReserva;
+    }
+
+    public void setDataReserva(LocalDate dataReserva) {
+        this.dataReserva = dataReserva;
+    }
+
+    public LocalTime getHoraReserva() {
+        return horaReserva;
+    }
+
+    public void setHoraReserva(LocalTime horaReserva) {
+        this.horaReserva = horaReserva;
+    }
+
+    public LocalDateTime getDataSolicitacao() {
+        return dataSolicitacao;
+    }
+
+    public void setDataSolicitacao(LocalDateTime dataSolicitacao) {
+        this.dataSolicitacao = dataSolicitacao;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     @Override
     public String toString() {
         return "Solicitacao{" +
                 "id=" + id +
-                ", solicitante=" + (solicitante != null ? solicitante.getNome() : "null") +
-                ", espaco=" + (espaco != null ? espaco.getNome() : "null") +
-                ", dataHoraSolicitada=" + dataHoraSolicitada +
+                ", usuarioId=" + usuarioId +
+                ", espacoId=" + espacoId +
+                ", dataReserva=" + dataReserva +
+                ", horaReserva=" + horaReserva +
                 ", dataSolicitacao=" + dataSolicitacao +
                 ", status='" + status + '\'' +
                 '}';
@@ -64,9 +107,6 @@ public class Solicitacao {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    public void setSala(String sala) {
+        return id != null ? id.hashCode() : 0;
     }
 }

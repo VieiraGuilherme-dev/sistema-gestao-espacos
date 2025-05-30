@@ -53,6 +53,7 @@ public class ReservaController {
             Reserva reservaAprovada = reservaService.aprovarReserva(id);
             return ResponseEntity.ok(reservaAprovada);
         } catch (RuntimeException e) {
+            // If the service throws an exception (e.g., "Reserva não encontrada"), it's handled here.
             return ResponseEntity.notFound().build();
         }
     }
@@ -85,6 +86,38 @@ public class ReservaController {
             return reservaService.listarReservasOrdenadasPorDataHoraInicio();
         }
     }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<Reserva>> listarReservasPorStatus(@PathVariable String status) {
+        try {
+            List<Reserva> reservas = reservaService.listarPorStatus(status);
+            if (reservas.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.ok(reservas);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<List<Reserva>> listarReservasPorUsuario(@PathVariable Long usuarioId) {
+        List<Reserva> reservas = reservaService.listarPorUsuario(usuarioId);
+        if (reservas.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(reservas);
+    }
+
+    @GetMapping("/espaco/{espacoId}")
+    public ResponseEntity<List<Reserva>> listarReservasPorEspaco(@PathVariable Long espacoId) {
+        List<Reserva> reservas = reservaService.listarPorEspaco(espacoId);
+        if (reservas.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(reservas);
+    }
+
 
     static class ReservaRequest {
         private Long usuarioId;

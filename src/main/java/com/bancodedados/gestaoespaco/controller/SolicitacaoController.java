@@ -29,6 +29,7 @@ public class SolicitacaoController {
             Solicitacao novaSolicitacao = solicitacaoService.criarSolicitacao(usuarioId, espacoId, dataReserva, horaReserva);
             return new ResponseEntity<>(novaSolicitacao, HttpStatus.CREATED);
         } catch (RuntimeException e) {
+            // Este catch lida com exceções do serviço (por exemplo, espaço não encontrado, conflito)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }

@@ -1,33 +1,50 @@
 package com.bancodedados.gestaoespaco.model;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class Reserva implements Serializable {
+public class Reserva {
+
     private Long id;
+    private Long usuarioId;
+    private Long espacoId;
     private LocalDateTime dataHoraInicio;
     private LocalDateTime dataHoraFim;
-    private EspacoFisico espacoFisico;
-    private Usuario usuario;
     private StatusReserva status;
 
-    public Reserva() {}
-
-    // Construtor com campos necessários para criação
-    public Reserva(LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim, EspacoFisico espacoFisico, Usuario usuario) {
-        this.dataHoraInicio = dataHoraInicio;
-        this.dataHoraFim = dataHoraFim;
-        this.espacoFisico = espacoFisico;
-        this.usuario = usuario;
+    public Reserva() {
+        this.status = StatusReserva.PENDENTE; // Default status
     }
 
-    // --- Getters e Setters ---
+    public Reserva(Long usuarioId, Long espacoId, LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim) {
+        this.usuarioId = usuarioId;
+        this.espacoId = espacoId;
+        this.dataHoraInicio = dataHoraInicio;
+        this.dataHoraFim = dataHoraFim;
+        this.status = StatusReserva.PENDENTE; // Default status
+    }
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getUsuarioId() {
+        return usuarioId;
+    }
+
+    public void setUsuarioId(Long usuarioId) {
+        this.usuarioId = usuarioId;
+    }
+
+    public Long getEspacoId() {
+        return espacoId;
+    }
+
+    public void setEspacoId(Long espacoId) {
+        this.espacoId = espacoId;
     }
 
     public LocalDateTime getDataHoraInicio() {
@@ -46,22 +63,6 @@ public class Reserva implements Serializable {
         this.dataHoraFim = dataHoraFim;
     }
 
-    public EspacoFisico getEspacoFisico() {
-        return espacoFisico;
-    }
-
-    public void setEspacoFisico(EspacoFisico espacoFisico) {
-        this.espacoFisico = espacoFisico;
-    }
-
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
     public StatusReserva getStatus() {
         return status;
     }
@@ -74,11 +75,24 @@ public class Reserva implements Serializable {
     public String toString() {
         return "Reserva{" +
                 "id=" + id +
+                ", usuarioId=" + usuarioId +
+                ", espacoId=" + espacoId +
                 ", dataHoraInicio=" + dataHoraInicio +
                 ", dataHoraFim=" + dataHoraFim +
-                ", espacoFisico=" + (espacoFisico != null ? espacoFisico.getId() : "null") +
-                ", usuario=" + (usuario != null ? usuario.getId() : "null") +
                 ", status=" + status +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Reserva)) return false;
+        Reserva that = (Reserva) o;
+        return id != null && id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
     }
 }

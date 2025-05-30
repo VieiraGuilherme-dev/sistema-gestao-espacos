@@ -1,140 +1,182 @@
 package com.bancodedados.gestaoespaco.service;
 
 import com.bancodedados.gestaoespaco.model.Reserva;
-import com.bancodedados.gestaoespaco.model.EspacoFisico;
 import com.bancodedados.gestaoespaco.model.StatusReserva;
 import com.bancodedados.gestaoespaco.repository.ReservaRepository;
-import com.bancodedados.gestaoespaco.repository.UsuarioRepository;
-import com.bancodedados.gestaoespaco.repository.EspacoFisicoRepository;
-
+import com.bancodedados.gestaoespaco.repository.EspacoFisicoRepository; // Needed for space availability
+import com.bancodedados.gestaoespaco.repository.UsuarioRepository; // Needed to check if user exists
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservaService {
 
     private final ReservaRepository reservaRepository;
-    private final UsuarioRepository usuarioRepository;
     private final EspacoFisicoRepository espacoFisicoRepository;
+    private final UsuarioRepository usuarioRepository; // Assuming you have a UsuarioRepository
 
-    public ReservaService(ReservaRepository reservaRepository,
-                          UsuarioRepository usuarioRepository,
-                          EspacoFisicoRepository espacoFisicoRepository) {
+    public ReservaService(ReservaRepository reservaRepository, EspacoFisicoRepository espacoFisicoRepository, UsuarioRepository usuarioRepository) {
         this.reservaRepository = reservaRepository;
-        this.usuarioRepository = usuarioRepository;
         this.espacoFisicoRepository = espacoFisicoRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Transactional
-    public Reserva criarReserva(Long usuarioId, Long espacoId,
-                                LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim) {
-
-        if (dataHoraInicio.isAfter(dataHoraFim) || dataHoraInicio.isEqual(dataHoraFim)) {
-            throw new RuntimeException("A data/hora de início deve ser anterior à data/hora de fim.");
-        }
-        if (dataHoraInicio.isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Não é possível fazer uma reserva para um horário que já passou.");
-        }
-
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado com ID: " + usuarioId));
-
-        EspacoFisico espaco = espacoFisicoRepository.findById(espacoId)
-                .orElseThrow(() -> new RuntimeException("Espaço físico não encontrado com ID: " + espacoId));
-
-        Reserva novaReserva = new Reserva(dataHoraInicio, dataHoraFim, espaco, usuario);
-        novaReserva.setStatus(StatusReserva.PENDENTE);
-
-        return salvarReserva(novaReserva); // Delega para o método de salvamento com validação de conflito
-    }
-
-    @Transactional
-    public Reserva salvarReserva(Reserva reserva) {
-        // Validação de conflito de horário
-        List<Reserva> conflitos = reservaRepository.verificarConflitoHorario(
-                reserva.getEspacoFisico().getId(),
-                reserva.getDataHoraInicio(),
-                reserva.getDataHoraFim()
-        );
-
-        if (!conflitos.isEmpty()) {
-            if (reserva.getId() != null) {
-                boolean isConflictWithSelf = conflitos.stream().anyMatch(r -> r.getId().equals(reserva.getId()));
-                if (!isConflictWithSelf || conflitos.size() > 1) { // Se houver outro conflito ou o conflito não é com a própria reserva
-                    throw new RuntimeException("Já existe uma reserva no mesmo horário para este espaço.");
-                }
-            } else {
-                throw new RuntimeException("Já existe uma reserva no mesmo horário para este espaço.");
+    public Reserva criarReserva(Long usuarioId, Long espacoId, LocalDateTime dataHoraInicio, LocalDateTime dataHoraFim) {
+        try {
+            // Validate user and space existence
+            if (!usuarioRepository.existsById(usuarioId)) {
+                throw new RuntimeException("Usuário não encontrado com ID: " + usuarioId);
             }
+            if (!espacoFisicoRepository.existsById(espacoId)) {
+                throw new RuntimeException("Espaço físico não encontrado com ID: " + espacoId);
+            }
+
+            // Basic validation: end time must be after start time
+            if (dataHoraFim.isBefore(dataHoraInicio) || dataHoraFim.isEqual(dataHoraInicio)) {
+                throw new RuntimeException("A data/hora de fim deve ser posterior à data/hora de início.");
+            }
+
+            List<Reserva> overlappingReservas = reservaRepository.findOverlappingReservas(espacoId, dataHoraInicio, dataHoraFim, null);
+            if (!overlappingReservas.isEmpty()) {
+                throw new RuntimeException("Já existe uma reserva para este espaço no período solicitado.");
+            }
+
+            Reserva novaReserva = new Reserva(usuarioId, espacoId, dataHoraInicio, dataHoraFim);
+            return reservaRepository.save(novaReserva);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao criar reserva: " + e.getMessage(), e);
         }
-
-        return reservaRepository.save(reserva);
-    }
-
-    public List<Reserva> listarReservas() {
-        return reservaRepository.findAll();
     }
 
     public Optional<Reserva> buscarReserva(Long id) {
-        return reservaRepository.findById(id);
-    }
-
-    public void excluirReserva(Long id) {
-        if (!reservaRepository.existsById(id)) {
-            throw new RuntimeException("Reserva não encontrada com ID: " + id);
-        }
-        reservaRepository.deleteById(id);
-    }
-
-    public List<Reserva> listarPorStatus(String status) {
         try {
-            StatusReserva statusEnum = StatusReserva.valueOf(status.toUpperCase()); // Converte a string para Enum
-            return reservaRepository.findByStatus(statusEnum);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Status de reserva inválido: " + status + ". Status permitidos: " + java.util.Arrays.toString(StatusReserva.values()));
+            return reservaRepository.findById(id);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar reserva por ID: " + e.getMessage(), e);
         }
     }
 
-    public List<Reserva> listarPorUsuario(Long usuarioId) {
-        return reservaRepository.findByUsuarioId(usuarioId);
+    public List<Reserva> listarReservas() {
+        try {
+            return reservaRepository.findAll();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar reservas: " + e.getMessage(), e);
+        }
     }
 
-    public List<Reserva> listarPorEspaco(Long espacoId) {
-        return reservaRepository.findByEspacoFisicoId(espacoId);
-    }
-
+    @Transactional
     public Reserva aprovarReserva(Long id) {
-        Reserva reserva = reservaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
-        reserva.setStatus(StatusReserva.APROVADA); // Usando o Enum
-        return reservaRepository.save(reserva);
+        try {
+            Reserva reserva = reservaRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
+
+            if (reserva.getStatus() != StatusReserva.PENDENTE) {
+                throw new RuntimeException("A reserva não pode ser aprovada pois não está no status PENDENTE.");
+            }
+
+            List<Reserva> overlappingReservas = reservaRepository.findOverlappingReservas(
+                    reserva.getEspacoId(),
+                    reserva.getDataHoraInicio(),
+                    reserva.getDataHoraFim(),
+                    reserva.getId() // Exclude current reservation from overlap check
+            );
+            if (!overlappingReservas.isEmpty()) {
+                throw new RuntimeException("Não é possível aprovar a reserva devido a conflito de horários com outra reserva já aprovada ou pendente.");
+            }
+
+            reserva.setStatus(StatusReserva.APROVADA);
+            return reservaRepository.save(reserva);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao aprovar reserva: " + e.getMessage(), e);
+        }
     }
 
     @Transactional
     public Reserva recusarReserva(Long id) {
-        Reserva reserva = reservaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
-        reserva.setStatus(StatusReserva.RECUSADA);
-        return reservaRepository.save(reserva);
+        try {
+            Reserva reserva = reservaRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
+
+            if (reserva.getStatus() != StatusReserva.PENDENTE) {
+                throw new RuntimeException("A reserva não pode ser recusada pois não está no status PENDENTE.");
+            }
+
+            reserva.setStatus(StatusReserva.REJEITADA);
+            return reservaRepository.save(reserva);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao recusar reserva: " + e.getMessage(), e);
+        }
     }
 
     @Transactional
     public Reserva cancelarReserva(Long id) {
-        Reserva reserva = reservaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
-        reserva.setStatus(StatusReserva.CANCELADA);
-        return reservaRepository.save(reserva);
+        try {
+            Reserva reserva = reservaRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Reserva não encontrada com ID: " + id));
+
+            if (reserva.getStatus() == StatusReserva.APROVADA || reserva.getStatus() == StatusReserva.PENDENTE) {
+                reserva.setStatus(StatusReserva.CANCELADA);
+                return reservaRepository.save(reserva);
+            } else {
+                throw new RuntimeException("A reserva não pode ser cancelada no status atual: " + reserva.getStatus());
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao cancelar reserva: " + e.getMessage(), e);
+        }
     }
 
     public List<Reserva> listarReservasOrdenadasPorDataHoraInicio() {
-        return reservaRepository.findAllByOrderByDataHoraInicioAsc();
+        try {
+            return reservaRepository.findAll().stream()
+                    .sorted(Comparator.comparing(Reserva::getDataHoraInicio))
+                    .collect(Collectors.toList());
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar reservas ordenadas por data/hora de início: " + e.getMessage(), e);
+        }
     }
 
     public List<Reserva> listarReservasOrdenadasPorStatus() {
-        return reservaRepository.findAllByOrderByStatusAsc();
+        try {
+            return reservaRepository.findAll().stream()
+                    .sorted(Comparator.comparing(Reserva::getStatus))
+                    .collect(Collectors.toList());
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar reservas ordenadas por status: " + e.getMessage(), e);
+        }
+    }
+
+    public List<Reserva> listarPorStatus(String status) {
+        try {
+            StatusReserva statusEnum = StatusReserva.valueOf(status.toUpperCase());
+            return reservaRepository.findByStatus(statusEnum);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Status de reserva inválido: " + status);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar reservas por status: " + e.getMessage(), e);
+        }
+    }
+
+    public List<Reserva> listarPorUsuario(Long usuarioId) {
+        try {
+            return reservaRepository.findByUsuarioId(usuarioId);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar reservas por usuário: " + e.getMessage(), e);
+        }
+    }
+
+    public List<Reserva> listarPorEspaco(Long espacoId) {
+        try {
+            return reservaRepository.findByEspacoId(espacoId);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar reservas por espaço: " + e.getMessage(), e);
+        }
     }
 }
