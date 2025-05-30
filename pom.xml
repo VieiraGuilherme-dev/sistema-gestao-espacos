@@ -12,8 +12,7 @@
 	</parent>
 
 	<groupId>com.universidade</groupId>
-	<artifactId>Gestão Espaco</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>gestao-espaco</artifactId> <version>0.0.1-SNAPSHOT</version>
 	<name>Gestao-Espaco</name>
 	<description>Sistema de Gestão de Espaço Físico</description>
 
@@ -28,18 +27,15 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
-
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 		</dependency>
-
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -48,12 +44,12 @@
 			<optional>true</optional>
 		</dependency>
 
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 	<build>

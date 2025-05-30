@@ -1,88 +1,97 @@
 package com.bancodedados.gestaoespaco.config;
 
-import com.bancodedados.gestaoespaco.model.Usuario;
-import com.bancodedados.gestaoespaco.model.EspacoFisico;
-import com.bancodedados.gestaoespaco.model.TipoUsuario;
 import com.bancodedados.gestaoespaco.model.TipoEspaco;
-import com.bancodedados.gestaoespaco.repository.UsuarioRepository;
-import com.bancodedados.gestaoespaco.repository.EspacoFisicoRepository;
+import com.bancodedados.gestaoespaco.model.TipoUsuario;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
 @Configuration
 public class DataLoader {
 
+    @Autowired
+    private DataSource dataSource;
+
     @Bean
-    public CommandLineRunner loadData(UsuarioRepository usuarioRepository, EspacoFisicoRepository espacoFisicoRepository) {
+    public CommandLineRunner loadData() {
         return args -> {
+            try (Connection conn = dataSource.getConnection()) {
 
-            if (usuarioRepository.count() == 0) {
-                Usuario usuario1 = new Usuario();
-                usuario1.setNome("Admin do Sistema");
-                usuario1.setEmail("admin@gestao.com");
-                usuario1.setTipo(TipoUsuario.ADMIN);
-                usuarioRepository.save(usuario1);
+                // Verifica se há usuários
+                ResultSet rsUsuarios = conn.prepareStatement("SELECT COUNT(*) FROM usuarios").executeQuery();
+                rsUsuarios.next();
+                if (rsUsuarios.getInt(1) == 0) {
 
-                Usuario usuario2 = new Usuario();
-                usuario2.setNome("Aluno Exemplo");
-                usuario2.setEmail("aluno@email.com");
-                usuario2.setTipo(TipoUsuario.ALUNO);
-                usuarioRepository.save(usuario2);
+                    String sqlUsuario = "INSERT INTO usuarios (nome, email, tipo) VALUES (?, ?, ?)";
+                    PreparedStatement stmtUsuario = conn.prepareStatement(sqlUsuario);
 
-                // NOVO USUÁRIO: Professor
-                Usuario usuario3 = new Usuario();
-                usuario3.setNome("Prof. Ana Silva");
-                usuario3.setEmail("ana.silva@escola.com");
-                usuario3.setTipo(TipoUsuario.PROFESSOR); // Usando o Enum
-                usuarioRepository.save(usuario3);
+                    stmtUsuario.setString(1, "Admin do Sistema");
+                    stmtUsuario.setString(2, "admin@gestao.com");
+                    stmtUsuario.setString(3, TipoUsuario.ADMIN.name());
+                    stmtUsuario.executeUpdate();
 
-                // NOVO USUÁRIO: Funcionário
-                Usuario usuario4 = new Usuario();
-                usuario4.setNome("Func. João Mendes");
-                usuario4.setEmail("joao.mendes@escola.com");
-                usuario4.setTipo(TipoUsuario.FUNCIONARIO); // Usando o Enum
-                usuarioRepository.save(usuario4);
+                    stmtUsuario.setString(1, "Aluno Exemplo");
+                    stmtUsuario.setString(2, "aluno@email.com");
+                    stmtUsuario.setString(3, TipoUsuario.ALUNO.name());
+                    stmtUsuario.executeUpdate();
 
-                System.out.println("Usuários de teste inseridos.");
-            }
+                    stmtUsuario.setString(1, "Prof. Ana Silva");
+                    stmtUsuario.setString(2, "ana.silva@escola.com");
+                    stmtUsuario.setString(3, TipoUsuario.PROFESSOR.name());
+                    stmtUsuario.executeUpdate();
 
-            if (espacoFisicoRepository.count() == 0) {
-                EspacoFisico espaco1 = new EspacoFisico();
-                espaco1.setNome("Auditório Principal");
-                espaco1.setTipo(TipoEspaco.AUDITORIO);
-                espaco1.setMetragem(200.0);
-                espacoFisicoRepository.save(espaco1);
+                    stmtUsuario.setString(1, "Func. João Mendes");
+                    stmtUsuario.setString(2, "joao.mendes@escola.com");
+                    stmtUsuario.setString(3, TipoUsuario.FUNCIONARIO.name());
+                    stmtUsuario.executeUpdate();
 
-                EspacoFisico espaco2 = new EspacoFisico();
-                espaco2.setNome("Laboratório de Informática 1");
-                espaco2.setTipo(TipoEspaco.LABORATORIO);
-                espaco2.setMetragem(50.0);
-                espacoFisicoRepository.save(espaco2);
+                    System.out.println("Usuários de teste inseridos.");
+                }
 
-                // NOVO ESPAÇO: Sala de Aula
-                EspacoFisico espaco3 = new EspacoFisico();
-                espaco3.setNome("Sala de Aula 101");
-                espaco3.setTipo(TipoEspaco.SALA_DE_AULA);
-                espaco3.setMetragem(40.0);
-                espacoFisicoRepository.save(espaco3);
+                // Verifica se há espaços físicos
+                ResultSet rsEspacos = conn.prepareStatement("SELECT COUNT(*) FROM espacos").executeQuery();
+                rsEspacos.next();
+                if (rsEspacos.getInt(1) == 0) {
 
-                // NOVO ESPAÇO: Sala de Reunião
-                EspacoFisico espaco4 = new EspacoFisico();
-                espaco4.setNome("Sala de Reunião Bloco B");
-                espaco4.setTipo(TipoEspaco.SALA_DE_REUNIAO);
-                espaco4.setMetragem(25.0);
-                espacoFisicoRepository.save(espaco4);
+                    String sqlEspaco = "INSERT INTO espacos (nome, tipo, metragem) VALUES (?, ?, ?)";
+                    PreparedStatement stmtEspaco = conn.prepareStatement(sqlEspaco);
 
-                // NOVO ESPAÇO: Quadra Poliesportiva
-                EspacoFisico espaco5 = new EspacoFisico();
-                espaco5.setNome("Quadra Poliesportiva");
-                espaco5.setTipo(TipoEspaco.QUADRA);
-                espaco5.setMetragem(600.0);
-                espacoFisicoRepository.save(espaco5);
+                    stmtEspaco.setString(1, "Auditório Principal");
+                    stmtEspaco.setString(2, TipoEspaco.AUDITORIO.name());
+                    stmtEspaco.setDouble(3, 200.0);
+                    stmtEspaco.executeUpdate();
 
+                    stmtEspaco.setString(1, "Laboratório de Informática 1");
+                    stmtEspaco.setString(2, TipoEspaco.LABORATORIO.name());
+                    stmtEspaco.setDouble(3, 50.0);
+                    stmtEspaco.executeUpdate();
 
-                System.out.println("Espaços físicos de teste inseridos.");
+                    stmtEspaco.setString(1, "Sala de Aula 101");
+                    stmtEspaco.setString(2, TipoEspaco.SALA_DE_AULA.name());
+                    stmtEspaco.setDouble(3, 40.0);
+                    stmtEspaco.executeUpdate();
+
+                    stmtEspaco.setString(1, "Sala de Reunião Bloco B");
+                    stmtEspaco.setString(2, TipoEspaco.SALA_DE_REUNIAO.name());
+                    stmtEspaco.setDouble(3, 25.0);
+                    stmtEspaco.executeUpdate();
+
+                    stmtEspaco.setString(1, "Quadra Poliesportiva");
+                    stmtEspaco.setString(2, TipoEspaco.QUADRA.name());
+                    stmtEspaco.setDouble(3, 600.0);
+                    stmtEspaco.executeUpdate();
+
+                    System.out.println("Espaços físicos de teste inseridos.");
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         };
     }
