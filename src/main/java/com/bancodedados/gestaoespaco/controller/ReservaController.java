@@ -31,7 +31,7 @@ public class ReservaController {
             );
             return ResponseEntity.status(HttpStatus.CREATED).body(novaReserva);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(null); // Tratar de forma mais robusta em um projeto real
+            return ResponseEntity.badRequest().body(null);
         }
     }
 
@@ -40,7 +40,6 @@ public class ReservaController {
         return reservaService.listarReservas();
     }
 
-    // Endpoint para buscar uma reserva por ID
     @GetMapping("/{id}")
     public ResponseEntity<Reserva> buscarReservaPorId(@PathVariable Long id) {
         Optional<Reserva> reserva = reservaService.buscarReserva(id);
@@ -48,7 +47,6 @@ public class ReservaController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Endpoint para aprovar uma reserva
     @PutMapping("/{id}/aprovar")
     public ResponseEntity<Reserva> aprovarReserva(@PathVariable Long id) {
         try {
@@ -59,7 +57,6 @@ public class ReservaController {
         }
     }
 
-    // Endpoint para recusar uma reserva
     @PutMapping("/{id}/recusar")
     public ResponseEntity<Reserva> recusarReserva(@PathVariable Long id) {
         try {
@@ -80,12 +77,11 @@ public class ReservaController {
         }
     }
 
-    @GetMapping("/historico") // Novo endpoint
+    @GetMapping("/historico")
     public List<Reserva> listarHistorico(@RequestParam(required = false, defaultValue = "dataHoraInicio") String ordenarPor) {
         if (ordenarPor.equalsIgnoreCase("status")) {
             return reservaService.listarReservasOrdenadasPorStatus();
         } else {
-
             return reservaService.listarReservasOrdenadasPorDataHoraInicio();
         }
     }
@@ -96,20 +92,36 @@ public class ReservaController {
         private LocalDateTime dataHoraInicio;
         private LocalDateTime dataHoraFim;
 
-        public Long getUsuarioId() { return usuarioId; }
+        public Long getUsuarioId() {
+            return usuarioId;
+        }
 
-        public void setUsuarioId(Long usuarioId) { this.usuarioId = usuarioId; }
+        public void setUsuarioId(Long usuarioId) {
+            this.usuarioId = usuarioId;
+        }
 
-        public Long getEspacoId() { return espacoId; }
+        public Long getEspacoId() {
+            return espacoId;
+        }
 
-        public void setEspacoId(Long espacoId) { this.espacoId = espacoId; }
+        public void setEspacoId(Long espacoId) {
+            this.espacoId = espacoId;
+        }
 
-        public LocalDateTime getDataHoraInicio() { return dataHoraInicio; }
+        public LocalDateTime getDataHoraInicio() {
+            return dataHoraInicio;
+        }
 
-        public void setDataHoraInicio(LocalDateTime dataHoraInicio) { this.dataHoraInicio = dataHoraInicio; }
+        public void setDataHoraInicio(LocalDateTime dataHoraInicio) {
+            this.dataHoraInicio = dataHoraInicio;
+        }
 
-        public LocalDateTime getDataHoraFim() { return dataHoraFim; }
+        public LocalDateTime getDataHoraFim() {
+            return dataHoraFim;
+        }
 
-        public void setDataHoraFim(LocalDateTime dataHoraFim) { this.dataHoraFim = dataHoraFim; }
+        public void setDataHoraFim(LocalDateTime dataHoraFim) {
+            this.dataHoraFim = dataHoraFim;
+        }
     }
 }
