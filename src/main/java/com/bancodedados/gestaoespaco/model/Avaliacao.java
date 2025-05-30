@@ -1,39 +1,23 @@
 package com.bancodedados.gestaoespaco.model;
 
-
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "avaliacao")
 public class Avaliacao {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "solicitacao_id", nullable = false)
-    private Solicitacao solicitacao;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "gestor_id", nullable = false)
-    private Usuario gestor;
-    @Column(nullable = false)
+    private Long solicitacaoId;
+    private Long gestorId;
     private String status; // APROVADA, REJEITADA
-
-    @Column(columnDefinition = "TEXT")
     private String justificativa;
-
-    @Column(nullable = false)
     private LocalDateTime dataAvaliacao;
 
     public Avaliacao() {
         this.dataAvaliacao = LocalDateTime.now();
     }
 
-    public Avaliacao(Solicitacao solicitacao, Usuario gestor, String status, String justificativa) {
-        this.solicitacao = solicitacao;
-        this.gestor = gestor;
+    public Avaliacao(Long solicitacaoId, Long gestorId, String status, String justificativa) {
+        this.solicitacaoId = solicitacaoId;
+        this.gestorId = gestorId;
         this.status = status;
         this.justificativa = justificativa;
         this.dataAvaliacao = LocalDateTime.now();
@@ -47,20 +31,20 @@ public class Avaliacao {
         this.id = id;
     }
 
-    public Solicitacao getSolicitacao() {
-        return solicitacao;
+    public Long getSolicitacaoId() {
+        return solicitacaoId;
     }
 
-    public void setSolicitacao(Solicitacao solicitacao) {
-        this.solicitacao = solicitacao;
+    public void setSolicitacaoId(Long solicitacaoId) {
+        this.solicitacaoId = solicitacaoId;
     }
 
-    public Usuario getGestor() {
-        return gestor;
+    public Long getGestorId() {
+        return gestorId;
     }
 
-    public void setGestor(Usuario gestor) {
-        this.gestor = gestor;
+    public void setGestorId(Long gestorId) {
+        this.gestorId = gestorId;
     }
 
     public String getStatus() {
@@ -91,9 +75,10 @@ public class Avaliacao {
     public String toString() {
         return "Avaliacao{" +
                 "id=" + id +
-                ", solicitacaoId=" + (solicitacao != null ? solicitacao.getId() : "null") +
-                ", gestor=" + (gestor != null ? gestor.getNome() : "null") +
+                ", solicitacaoId=" + solicitacaoId +
+                ", gestorId=" + gestorId +
                 ", status='" + status + '\'' +
+                ", justificativa='" + justificativa + '\'' +
                 ", dataAvaliacao=" + dataAvaliacao +
                 '}';
     }
@@ -101,9 +86,9 @@ public class Avaliacao {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Avaliacao avaliacao = (Avaliacao) o;
-        return id != null && id.equals(avaliacao.id);
+        if (!(o instanceof Avaliacao)) return false;
+        Avaliacao that = (Avaliacao) o;
+        return id != null && id.equals(that.id);
     }
 
     @Override
