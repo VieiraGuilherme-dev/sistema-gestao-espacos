@@ -1,31 +1,20 @@
 package com.bancodedados.gestaoespaco.model;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "auditoria_usuario")
 public class AuditoriaUsuario {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
-    private Usuario usuario;
-
-    @Column(nullable = false)
+    private Long usuarioId;
     private String acao;
-
-    @Column(nullable = false)
     private LocalDateTime dataHora;
 
     public AuditoriaUsuario() {
         this.dataHora = LocalDateTime.now();
     }
 
-    public AuditoriaUsuario(Usuario usuario, String acao) {
-        this.usuario = usuario;
+    public AuditoriaUsuario(Long usuarioId, String acao) {
+        this.usuarioId = usuarioId;
         this.acao = acao;
         this.dataHora = LocalDateTime.now();
     }
@@ -38,12 +27,12 @@ public class AuditoriaUsuario {
         this.id = id;
     }
 
-    public Usuario getUsuario() {
-        return usuario;
+    public Long getUsuarioId() {
+        return usuarioId;
     }
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
+    public void setUsuarioId(Long usuarioId) {
+        this.usuarioId = usuarioId;
     }
 
     public String getAcao() {
@@ -66,7 +55,7 @@ public class AuditoriaUsuario {
     public String toString() {
         return "AuditoriaUsuario{" +
                 "id=" + id +
-                ", usuarioId=" + (usuario != null ? usuario.getId() : "null") +
+                ", usuarioId=" + usuarioId +
                 ", acao='" + acao + '\'' +
                 ", dataHora=" + dataHora +
                 '}';
@@ -75,10 +64,11 @@ public class AuditoriaUsuario {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof AuditoriaUsuario)) return false;
         AuditoriaUsuario that = (AuditoriaUsuario) o;
         return id != null && id.equals(that.id);
     }
+
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
