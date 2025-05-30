@@ -1,30 +1,15 @@
 package com.bancodedados.gestaoespaco.model;
-import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-@Entity
-@Table(name = "solicitacao")
 public class Solicitacao {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "solicitante_id", nullable = false)
     private Usuario solicitante;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "espaco_id", nullable = false)
     private EspacoFisico espaco;
-
-    @Column(nullable = false)
-    private LocalDateTime dataHoraSolicitada; // data e hora desejadas para o uso do espaço
-
-    @Column(nullable = false)
-    private LocalDateTime dataSolicitacao;    // data em que foi feita a solicitação
-
-    @Column(nullable = false)
-    private String status; // PENDENTE, APROVADA, REJEITADA
+    private LocalDateTime dataHoraSolicitada;
+    private LocalDateTime dataSolicitacao;
+    private String status;
 
     public Solicitacao() {
         this.dataSolicitacao = LocalDateTime.now();
@@ -35,59 +20,27 @@ public class Solicitacao {
         this.solicitante = solicitante;
         this.espaco = espaco;
         this.dataHoraSolicitada = dataHoraSolicitada;
-        // Automatically set dataSolicitacao upon creation
         this.dataSolicitacao = LocalDateTime.now();
-        // Set initial status to PENDENTE
         this.status = "PENDENTE";
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Usuario getSolicitante() { return solicitante; }
+    public void setSolicitante(Usuario solicitante) { this.solicitante = solicitante; }
 
-    public Usuario getSolicitante() {
-        return solicitante;
-    }
+    public EspacoFisico getEspaco() { return espaco; }
+    public void setEspaco(EspacoFisico espaco) { this.espaco = espaco; }
 
-    public void setSolicitante(Usuario solicitante) {
-        this.solicitante = solicitante;
-    }
+    public LocalDateTime getDataHoraSolicitada() { return dataHoraSolicitada; }
+    public void setDataHoraSolicitada(LocalDateTime dataHoraSolicitada) { this.dataHoraSolicitada = dataHoraSolicitada; }
 
-    public EspacoFisico getEspaco() {
-        return espaco;
-    }
+    public LocalDateTime getDataSolicitacao() { return dataSolicitacao; }
+    public void setDataSolicitacao(LocalDateTime dataSolicitacao) { this.dataSolicitacao = dataSolicitacao; }
 
-    public void setEspaco(EspacoFisico espaco) {
-        this.espaco = espaco;
-    }
-
-    public LocalDateTime getDataHoraSolicitada() {
-        return dataHoraSolicitada;
-    }
-
-    public void setDataHoraSolicitada(LocalDateTime dataHoraSolicitada) {
-        this.dataHoraSolicitada = dataHoraSolicitada;
-    }
-
-    public LocalDateTime getDataSolicitacao() {
-        return dataSolicitacao;
-    }
-
-    public void setDataSolicitacao(LocalDateTime dataSolicitacao) {
-        this.dataSolicitacao = dataSolicitacao;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
     @Override
     public String toString() {
@@ -104,13 +57,13 @@ public class Solicitacao {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Solicitacao)) return false;
         Solicitacao that = (Solicitacao) o;
         return id != null && id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        return id != null ? id.hashCode() : 0;
+        return Objects.hash(id);
     }
 }

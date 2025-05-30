@@ -1,7 +1,6 @@
 package com.bancodedados.gestaoespaco.service;
 
 import com.bancodedados.gestaoespaco.model.Reserva;
-import com.bancodedados.gestaoespaco.model.Usuario;
 import com.bancodedados.gestaoespaco.model.EspacoFisico;
 import com.bancodedados.gestaoespaco.model.StatusReserva;
 import com.bancodedados.gestaoespaco.repository.ReservaRepository;

@@ -1,7 +1,6 @@
 package com.bancodedados.gestaoespaco.service;
 
 import com.bancodedados.gestaoespaco.model.Solicitacao;
-import com.bancodedados.gestaoespaco.model.Usuario;
 import com.bancodedados.gestaoespaco.model.EspacoFisico;
 import com.bancodedados.gestaoespaco.repository.EspacoFisicoRepository;
 import com.bancodedados.gestaoespaco.repository.SolicitacaoRepository;

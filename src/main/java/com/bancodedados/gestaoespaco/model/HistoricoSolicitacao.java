@@ -1,26 +1,14 @@
 package com.bancodedados.gestaoespaco.model;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-@Entity
-@Table(name = "historico_solicitacao")
 public class HistoricoSolicitacao {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "solicitacao_id", nullable = false)
     private Solicitacao solicitacao;
-
-    @Column(nullable = false)
     private String statusAnterior;
-
-    @Column(nullable = false)
     private String statusNovo;
-
-    @Column(nullable = false)
     private LocalDateTime dataHoraAlteracao;
 
     public HistoricoSolicitacao() {
@@ -34,45 +22,20 @@ public class HistoricoSolicitacao {
         this.dataHoraAlteracao = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Solicitacao getSolicitacao() { return solicitacao; }
+    public void setSolicitacao(Solicitacao solicitacao) { this.solicitacao = solicitacao; }
 
-    public Solicitacao getSolicitacao() {
-        return solicitacao;
-    }
+    public String getStatusAnterior() { return statusAnterior; }
+    public void setStatusAnterior(String statusAnterior) { this.statusAnterior = statusAnterior; }
 
-    public void setSolicitacao(Solicitacao solicitacao) {
-        this.solicitacao = solicitacao;
-    }
+    public String getStatusNovo() { return statusNovo; }
+    public void setStatusNovo(String statusNovo) { this.statusNovo = statusNovo; }
 
-    public String getStatusAnterior() {
-        return statusAnterior;
-    }
-
-    public void setStatusAnterior(String statusAnterior) {
-        this.statusAnterior = statusAnterior;
-    }
-
-    public String getStatusNovo() {
-        return statusNovo;
-    }
-
-    public void setStatusNovo(String statusNovo) {
-        this.statusNovo = statusNovo;
-    }
-
-    public LocalDateTime getDataHoraAlteracao() {
-        return dataHoraAlteracao;
-    }
-
-    public void setDataHoraAlteracao(LocalDateTime dataHoraAlteracao) {
-        this.dataHoraAlteracao = dataHoraAlteracao;
-    }
+    public LocalDateTime getDataHoraAlteracao() { return dataHoraAlteracao; }
+    public void setDataHoraAlteracao(LocalDateTime dataHoraAlteracao) { this.dataHoraAlteracao = dataHoraAlteracao; }
 
     @Override
     public String toString() {
@@ -88,7 +51,7 @@ public class HistoricoSolicitacao {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof HistoricoSolicitacao)) return false;
         HistoricoSolicitacao that = (HistoricoSolicitacao) o;
         return id != null && id.equals(that.id);
     }
